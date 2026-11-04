@@ -2,7 +2,6 @@
 import { useSyncExternalStore } from 'react';
 import { STORAGE_KEY } from '../config';
 import { defaultData, loadData, sanitize, saveData } from './storage';
-import { demoSet } from './demo';
 import { PRESET_SETS } from './presets';
 import { normalize } from './answer';
 import { uid } from './random';
@@ -15,15 +14,27 @@ let data: AppData;
 let saveFailed = false;
 let timer: ReturnType<typeof setTimeout> | undefined;
 
+// muss vor dem Start-Block stehen, der sie schon benutzt
+const DEMO_TITLE = 'Beispiel: Englisch – Schule';
+const DEMO_DESC = 'Zum Ausprobieren. Bearbeiten oder löschen, wenn du es nicht mehr brauchst.';
+
 {
   const loaded = loadData();
   data = loaded.data;
-  if (loaded.fresh) data = { ...data, sets: [demoSet()] };
-  const next = withPresets(data);
+  const next = withPresets(removeOldDemo(data));
   if (loaded.fresh || next !== data) {
     data = next;
     saveData(data);
   }
+}
+
+// Früheres Beispiel-Set (Englisch) einmalig entfernen – nur wenn Titel und Beschreibung noch unverändert sind
+export function removeOldDemo(d: AppData): AppData {
+  if (d.seeded.includes('demo-entfernt')) return d;
+  const demo = d.sets.filter((s) => s.title === DEMO_TITLE && s.description === DEMO_DESC);
+  const progress = { ...d.progress };
+  for (const s of demo) for (const c of s.cards) delete progress[c.id];
+  return { ...d, sets: d.sets.filter((s) => !demo.includes(s)), progress, seeded: [...d.seeded, 'demo-entfernt'] };
 }
 
 /** Fügt eingebaute Sets hinzu, die noch nie da waren (gelöschte kommen nicht zurück) */
