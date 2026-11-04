@@ -203,7 +203,13 @@
   gap: 10px;
 }
 
-.deck__nav--sort .deck__count {
+.deck__mid {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.deck__nav--sort .deck__mid {
   grid-column: 1 / -1;
   justify-self: center;
 }

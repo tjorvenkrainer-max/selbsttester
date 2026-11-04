@@ -42,6 +42,8 @@ export const PRESET_SETS: StudySet[] = [
     title: 'Französisch: Meinung & Argumentieren',
     description: 'Redemittel zum Diskutieren und Argumentieren.',
     color: 'violett',
+    termLang: 'fr-FR',
+    defLang: 'de-DE',
     cards: FR_MEINUNG.map(([term, definition], i) => ({ id: `preset-fr-meinung-${String(i + 1).padStart(2, '0')}`, term, definition })),
     createdAt: CREATED,
     updatedAt: CREATED,

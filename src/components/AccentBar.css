@@ -1,0 +1,38 @@
+.accents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.accents__key {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 8px;
+  border: 1.5px solid var(--field-border);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.accents__key:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.accents__key:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.accents__key:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.accents__shift[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}

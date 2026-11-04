@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { boxStats, cardStatus, dueAfter, emptyProgress, learningDaysBetween } from './srs';
+import { boxStats, cardStatus, dueAfter, emptyProgress, hardCardIds, learningDaysBetween } from './srs';
 
 const at = (d: number, h: number, m = 0) => new Date(2026, 10, d, h, m).getTime(); // November 2026, Ortszeit
 
@@ -43,5 +43,13 @@ describe('cardStatus & boxStats', () => {
     expect(s.dueInBox[1]).toBe(1);
     expect(s.counts).toEqual({ new: 1, learning: 1, known: 1, due: 1 });
     expect(s.nextDue).toBe(at(9, 4));
+  });
+});
+
+describe('hardCardIds', () => {
+  it('nimmt nur Karten mit Fehlern, die mit den meisten zuerst', () => {
+    const p = (wrong: number, seen: number) => ({ ...emptyProgress(), wrong, seen });
+    const progress = { a: p(1, 5), b: p(3, 4), c: p(0, 6), d: p(1, 1) };
+    expect(hardCardIds([{ id: 'a' }, { id: 'b' }, { id: 'c' }, { id: 'd' }, { id: 'e' }], progress)).toEqual(['b', 'd', 'a']);
   });
 });

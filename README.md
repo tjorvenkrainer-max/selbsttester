@@ -9,6 +9,9 @@ Test machen, Paare zuordnen. Läuft komplett im Browser – kein Server, kein Ac
   Karteikasten: Fach 1–5 mit 1 Tag, 3 Tagen, 1 Woche, 2 Wochen, 1 Monat Abstand. Vergessenes fällt zurück auf den Stapel.
 - **Tolerante Antwortprüfung** – Groß/klein egal, `(the) exam` akzeptiert auch `exam`, bei `groß, hoch` reicht eins.
   Tippfehler oder fehlende Umlaute → „fast richtig“ mit „Ich hatte recht“. Lange Definitionen: aufdecken, selbst bewerten.
+- **Akzent-Tasten** – beim Schreiben je nach Sprache des Sets (é, è, ç … / ñ, ¿ … / ä, ß …), mit ⇧ für Großbuchstaben.
+- **Vorlesen** – Lautsprecher-Knopf an Frage, Antwort und Karteikarte (Sprachausgabe des Browsers). Sprache pro Set im Editor.
+- **Schwierige üben** – Karten, die du schon mal falsch hattest; nach dem Test „Fehler lernen“.
 - **Karteikarten** – umdrehen (Leertaste/Tippen), blättern (Pfeile/Wischen), sortieren in gewusst / noch nicht.
 - **Test** – Wahr/Falsch, Auswahl, Schreiben. Auswertung im Rotstift-Stil.
 - **Zuordnen** – 6 Paare auf Zeit, Bestzeit pro Set.

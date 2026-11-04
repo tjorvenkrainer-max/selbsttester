@@ -54,7 +54,7 @@ export default function App() {
       page = <SetEditor id={route.id} />;
       break;
     case 'learn':
-      page = <Learn setId={route.id} scope={route.practice ? 'practice' : 'set'} />;
+      page = <Learn setId={route.id} scope={route.practice ? 'practice' : 'set'} only={route.only} />;
       break;
     case 'review':
       page = <Learn scope="due" />;

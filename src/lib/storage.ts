@@ -1,5 +1,6 @@
 // Laden/Speichern im localStorage + Backup-Datei prüfen
 import { STORAGE_KEY, THEME_KEY } from '../config';
+import { isLang } from './lang';
 import { DEFAULT_SETTINGS, SET_COLORS, type AppData, type Card, type CardProgress, type Settings, type StudySet } from './types';
 
 export function defaultData(): AppData {
@@ -22,6 +23,8 @@ function cleanSet(raw: unknown): StudySet | null {
     title: str(raw.title, 'Ohne Titel'),
     description: str(raw.description),
     color,
+    termLang: isLang(raw.termLang) ? raw.termLang : '',
+    defLang: isLang(raw.defLang) ? raw.defLang : '',
     cards,
     createdAt: num(raw.createdAt, Date.now()),
     updatedAt: num(raw.updatedAt, Date.now()),

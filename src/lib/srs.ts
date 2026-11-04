@@ -42,6 +42,16 @@ export function cardStatus(p: CardProgress | undefined, now: number): CardStatus
   return p.due <= now ? 'due' : 'known';
 }
 
+/** Karten, die schon mal falsch waren – die mit den meisten Fehlern zuerst */
+export function hardCardIds(cards: readonly { id: string }[], progress: Record<string, CardProgress>, limit = 20): string[] {
+  return cards
+    .map((c) => ({ id: c.id, p: progress[c.id] }))
+    .filter((x) => x.p && x.p.wrong > 0)
+    .sort((a, b) => b.p.wrong - a.p.wrong || b.p.wrong / Math.max(b.p.seen, 1) - a.p.wrong / Math.max(a.p.seen, 1))
+    .slice(0, limit)
+    .map((x) => x.id);
+}
+
 export interface BoxStats {
   total: number;
   counts: Record<CardStatus, number>;

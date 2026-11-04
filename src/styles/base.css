@@ -255,6 +255,14 @@ main:focus {
   width: 100%;
 }
 
+.speak {
+  color: var(--ink-soft);
+}
+
+.speak:hover {
+  color: var(--ink);
+}
+
 .linkbtn {
   padding: 0.25rem 0;
   border: 0;

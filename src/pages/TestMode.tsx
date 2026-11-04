@@ -278,6 +278,7 @@ function Results({
 }) {
   const { graded, score } = gradeTest(questions, answers, overrides);
   const pct = Math.round((100 * score) / questions.length);
+  const wrongIds = [...new Set(graded.filter((g) => !g.ok).map((g) => g.q.cardId))];
   const verdict =
     pct >= 90 ? 'Stark!' : pct >= 70 ? 'Gut – ein paar Lücken.' : pct >= 50 ? 'Halbe-halbe. Üb die falschen nochmal.' : 'Da geht noch was. Ab in den Lernmodus.';
   const empty = (a: TestAnswer) => a === undefined || a === '';
@@ -303,9 +304,15 @@ function Results({
         <button type="button" className="btn" onClick={onSetup}>
           Test anpassen
         </button>
-        <a className="btn" href={`#/set/${set.id}/lernen`}>
-          Lernmodus
-        </a>
+        {wrongIds.length > 0 ? (
+          <a className="btn btn--marker" href={`#/set/${set.id}/lernen/auswahl?k=${wrongIds.join(',')}`}>
+            {plural(wrongIds.length, 'Fehler', 'Fehler')} lernen
+          </a>
+        ) : (
+          <a className="btn" href={`#/set/${set.id}/lernen`}>
+            Lernmodus
+          </a>
+        )}
       </div>
       <ol className="paper__list paper__list--results">
         {graded.map((g, i) => (

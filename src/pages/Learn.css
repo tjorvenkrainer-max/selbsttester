@@ -77,6 +77,23 @@
   color: var(--ink-soft);
 }
 
+.pcard__right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: -6px -8px -6px 0;
+}
+
+.pcard__right:empty {
+  display: none;
+}
+
+.feedback__answer .speak {
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
 .pcard__tag {
   overflow: hidden;
   max-width: 60%;

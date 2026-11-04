@@ -6,6 +6,7 @@ import { uid } from '../lib/random';
 import { plural } from '../lib/format';
 import type { ImportedCard } from '../lib/importText';
 import { DRAFT_PREFIX } from '../config';
+import { LANGS } from '../lib/lang';
 import { navigate } from '../router';
 import { useTitle } from '../hooks';
 import { NotFound } from '../components/common';
@@ -23,6 +24,8 @@ interface Draft {
   title: string;
   description: string;
   color: SetColor;
+  termLang: string;
+  defLang: string;
   rows: Row[];
 }
 
@@ -31,19 +34,21 @@ const emptyRow = (): Row => ({ key: uid(), term: '', definition: '' });
 function fromSet(set: StudySet | undefined): Draft {
   if (!set) {
     const color = SET_COLORS[getData().sets.length % SET_COLORS.length].id;
-    return { title: '', description: '', color, rows: [emptyRow(), emptyRow(), emptyRow()] };
+    return { title: '', description: '', color, termLang: '', defLang: '', rows: [emptyRow(), emptyRow(), emptyRow()] };
   }
   return {
     title: set.title,
     description: set.description,
     color: set.color,
+    termLang: set.termLang,
+    defLang: set.defLang,
     rows: set.cards.map((c) => ({ key: c.id, id: c.id, term: c.term, definition: c.definition })),
   };
 }
 
 // Vergleich ohne leere Zeilen und Zeilen-Schlüssel
 const fingerprint = (d: Draft) =>
-  JSON.stringify([d.title.trim(), d.description.trim(), d.color, d.rows.filter((r) => r.term.trim() || r.definition.trim()).map((r) => [r.id, r.term, r.definition])]);
+  JSON.stringify([d.title.trim(), d.description.trim(), d.color, d.termLang ?? '', d.defLang ?? '', d.rows.filter((r) => r.term.trim() || r.definition.trim()).map((r) => [r.id, r.term, r.definition])]);
 
 function readDraft(key: string): Draft | null {
   try {
@@ -143,6 +148,8 @@ function EditorForm({ existing, openImport }: { existing?: StudySet; openImport:
       title,
       description: draft.description,
       color: draft.color,
+      termLang: draft.termLang ?? '',
+      defLang: draft.defLang ?? '',
       cards: rows.map((r) => ({ id: r.id, term: r.term, definition: r.definition })),
     });
     writeDraft(draftKey, null);
@@ -240,6 +247,33 @@ function EditorForm({ existing, openImport }: { existing?: StudySet; openImport:
             Beschreibung <span className="muted">(optional)</span>
           </label>
           <input id="set-desc" className="input" value={draft.description} onChange={(e) => patch({ description: e.target.value })} placeholder="z. B. Schularbeit am Freitag" />
+        </div>
+        <div className="editor__langs">
+          <div>
+            <label className="label" htmlFor="lang-term">
+              Sprache Begriff
+            </label>
+            <select id="lang-term" className="select" value={draft.termLang ?? ''} onChange={(e) => patch({ termLang: e.target.value })}>
+              {LANGS.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label" htmlFor="lang-def">
+              Sprache Definition
+            </label>
+            <select id="lang-def" className="select" value={draft.defLang ?? ''} onChange={(e) => patch({ defLang: e.target.value })}>
+              {LANGS.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <p className="field-hint editor__langhint">Für Vorlesen und Sonderzeichen-Tasten (é, ñ, ä …) beim Schreiben.</p>
         </div>
         <fieldset className="fieldset">
           <legend className="label">Farbe</legend>

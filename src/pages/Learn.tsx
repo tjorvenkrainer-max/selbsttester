@@ -16,7 +16,10 @@ import {
   type WrittenQuestion,
 } from '../lib/learn';
 import { checkAnswer, type Verdict } from '../lib/answer';
-import { boxStats } from '../lib/srs';
+import { boxStats, hardCardIds } from '../lib/srs';
+import { accentsFor } from '../lib/lang';
+import { SpeakButton } from '../components/SpeakButton';
+import { AccentBar } from '../components/AccentBar';
 import { plural, relativeDay } from '../lib/format';
 import type { AnswerWith, QuestionTypes, Side } from '../lib/types';
 import { useKeys, useNow, useTitle } from '../hooks';
@@ -29,11 +32,18 @@ import './Learn.css';
 const PRAISE = ['Richtig!', 'Genau!', 'Passt!', 'Sehr gut!', 'Stimmt!'];
 const sideLabel = (s: Side) => (s === 'term' ? 'Begriff' : 'Definition');
 
-function createSession(setId: string | undefined, scope: LearnScope) {
+type Only = 'hard' | string[] | undefined;
+
+function createSession(setId: string | undefined, scope: LearnScope, only: Only) {
   const d = getData();
   const sets = setId ? d.sets.filter((s) => s.id === setId) : d.sets;
   const valid = (c: { term: string; definition: string }) => c.term.trim() && c.definition.trim();
-  const cards: LearnCard[] = sets.flatMap((s) => s.cards.filter(valid).map((card) => ({ setId: s.id, card })));
+  let cards: LearnCard[] = sets.flatMap((s) => s.cards.filter(valid).map((card) => ({ setId: s.id, card })));
+  if (only) {
+    // nur schwierige Karten bzw. eine Auswahl (z. B. Fehler aus dem Test)
+    const ids = only === 'hard' ? hardCardIds(cards.map((c) => c.card), d.progress) : only;
+    cards = ids.map((id) => cards.find((c) => c.card.id === id)).filter((c): c is LearnCard => !!c);
+  }
   const config = { questionTypes: d.settings.questionTypes, answerWith: d.settings.answerWith, roundSize: d.settings.roundSize };
   const ctx: LearnContext = {
     cards: new Map(cards.map((lc) => [lc.card.id, lc])),
@@ -45,18 +55,38 @@ function createSession(setId: string | undefined, scope: LearnScope) {
   return { ctx, state: startSession(items, ctx) };
 }
 
-export function Learn({ setId, scope }: { setId?: string; scope: LearnScope }) {
+/** Sprache der Frage- und Antwortseite einer Karte */
+function langsOf(setId: string | undefined, promptSide: Side) {
+  const set = getData().sets.find((s) => s.id === setId);
+  const term = set?.termLang ?? '';
+  const def = set?.defLang ?? '';
+  return promptSide === 'term' ? { prompt: term, answer: def } : { prompt: def, answer: term };
+}
+
+export function Learn({ setId, scope, only }: { setId?: string; scope: LearnScope; only?: Only }) {
   const data = useData();
   const [run, setRun] = useState(0);
   const set = setId ? data.sets.find((s) => s.id === setId) : undefined;
   if (setId && !set) return <NotFound what="Set" />;
-  return <LearnSession key={run} setId={setId} scope={scope} title={set?.title ?? 'Alle Sets'} onRestart={() => setRun((r) => r + 1)} />;
+  return <LearnSession key={run} setId={setId} scope={scope} only={only} title={set?.title ?? 'Alle Sets'} onRestart={() => setRun((r) => r + 1)} />;
 }
 
-function LearnSession({ setId, scope, title, onRestart }: { setId?: string; scope: LearnScope; title: string; onRestart: () => void }) {
-  const mode = scope === 'due' ? 'Wiederholen' : scope === 'practice' ? 'Alles üben' : 'Lernen';
+function LearnSession({
+  setId,
+  scope,
+  only,
+  title,
+  onRestart,
+}: {
+  setId?: string;
+  scope: LearnScope;
+  only: Only;
+  title: string;
+  onRestart: () => void;
+}) {
+  const mode = only === 'hard' ? 'Schwierige üben' : only ? 'Fehler üben' : scope === 'due' ? 'Wiederholen' : scope === 'practice' ? 'Alles üben' : 'Lernen';
   useTitle(`${mode} – ${title}`);
-  const [boot] = useState(() => createSession(setId, scope));
+  const [boot] = useState(() => createSession(setId, scope, only));
   const ctx = boot.ctx;
   const [state, setState] = useState<LearnState>(boot.state);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -79,6 +109,7 @@ function LearnSession({ setId, scope, title, onRestart }: { setId?: string; scop
   const q = state.question;
   const entry = q ? ctx.cards.get(q.itemId) : undefined;
   const tag = !setId && entry ? getData().sets.find((s) => s.id === entry.setId)?.title : undefined;
+  const langs = q && entry ? langsOf(entry.setId, q.promptSide) : { prompt: '', answer: '' };
 
   return (
     <div className="learn">
@@ -96,16 +127,16 @@ function LearnSession({ setId, scope, title, onRestart }: { setId?: string; scop
       </FocusBar>
 
       <div className="learn__main">
-        {state.phase === 'question' && q?.kind === 'mc' && <McView key={`${state.round}-${state.pos}`} q={q} tag={tag} onAnswer={commit} />}
+        {state.phase === 'question' && q?.kind === 'mc' && <McView key={`${state.round}-${state.pos}`} q={q} tag={tag} langs={langs} onAnswer={commit} />}
         {state.phase === 'question' && q?.kind === 'written' && !q.selfCheck && (
-          <WrittenView key={`${state.round}-${state.pos}`} q={q} tag={tag} onAnswer={commit} />
+          <WrittenView key={`${state.round}-${state.pos}`} q={q} tag={tag} langs={langs} onAnswer={commit} />
         )}
         {state.phase === 'question' && q?.kind === 'written' && q.selfCheck && (
-          <SelfCheckView key={`${state.round}-${state.pos}`} q={q} tag={tag} onAnswer={commit} />
+          <SelfCheckView key={`${state.round}-${state.pos}`} q={q} tag={tag} langs={langs} onAnswer={commit} />
         )}
         {state.phase === 'summary' && <RoundSummary state={state} ctx={ctx} onNext={() => setState(nextRound(state, ctx))} />}
         {state.phase === 'done' && stats.total > 0 && <DoneView state={state} ctx={ctx} setId={setId} scope={scope} />}
-        {state.phase === 'done' && stats.total === 0 && <NothingToLearn ctx={ctx} setId={setId} scope={scope} />}
+        {state.phase === 'done' && stats.total === 0 && <NothingToLearn ctx={ctx} setId={setId} scope={scope} filtered={!!only} />}
       </div>
 
       {settingsOpen && <LearnSettings onClose={() => setSettingsOpen(false)} onApply={onRestart} />}
@@ -137,12 +168,17 @@ function LearnProgress({ done, half, total }: { done: number; half: number; tota
 
 const textSize = (t: string) => (t.length > 160 ? 'is-xs' : t.length > 90 ? 'is-s' : t.length > 32 ? 'is-m' : 'is-l');
 
-function PromptCard({ side, text, tag }: { side: Side; text: string; tag?: string }) {
+type Langs = { prompt: string; answer: string };
+
+function PromptCard({ side, text, tag, lang }: { side: Side; text: string; tag?: string; lang: string }) {
   return (
     <div className="pcard">
       <div className="pcard__head">
         <span className="pcard__label">{sideLabel(side)}</span>
-        {tag && <span className="pcard__tag">{tag}</span>}
+        <span className="pcard__right">
+          {tag && <span className="pcard__tag">{tag}</span>}
+          <SpeakButton text={text} lang={lang} />
+        </span>
       </div>
       <p className={`pcard__text ${textSize(text)}`}>{text}</p>
     </div>
@@ -168,7 +204,7 @@ function useAutoAdvance(active: boolean, ms: number, fn: () => void) {
 }
 
 // ---------- Auswahl ----------
-function McView({ q, tag, onAnswer }: { q: McQuestion; tag?: string; onAnswer: (ok: boolean) => void }) {
+function McView({ q, tag, langs, onAnswer }: { q: McQuestion; tag?: string; langs: Langs; onAnswer: (ok: boolean) => void }) {
   const [picked, setPicked] = useState<number | null>(null);
   const praise = usePraise();
   const answered = picked !== null;
@@ -199,7 +235,7 @@ function McView({ q, tag, onAnswer }: { q: McQuestion; tag?: string; onAnswer: (
 
   return (
     <div className="q">
-      <PromptCard side={q.promptSide} text={q.prompt} tag={tag} />
+      <PromptCard side={q.promptSide} text={q.prompt} tag={tag} lang={langs.prompt} />
       <p className="q__instr">Wähle {answerSide === 'term' ? 'den passenden Begriff' : 'die passende Definition'}</p>
       <div className="options">
         {q.options.map((o, i) => {
@@ -235,7 +271,9 @@ function McView({ q, tag, onAnswer }: { q: McQuestion; tag?: string; onAnswer: (
           <div className="feedback feedback--bad">
             <div className="feedback__text">
               <strong>{picked === -1 ? 'Kein Problem – merk dir:' : 'Nicht ganz. Richtig ist:'}</strong>
-              <span className="feedback__answer">{q.answer}</span>
+              <span className="feedback__answer">
+                {q.answer} <SpeakButton text={q.answer} lang={langs.answer} />
+              </span>
             </div>
             <button type="button" className="btn btn--ink feedback__next" autoFocus onClick={() => onAnswer(false)}>
               Weiter <span className="kbd">Enter</span>
@@ -248,7 +286,8 @@ function McView({ q, tag, onAnswer }: { q: McQuestion; tag?: string; onAnswer: (
 }
 
 // ---------- Schreiben ----------
-function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; onAnswer: (ok: boolean) => void }) {
+function WrittenView({ q, tag, langs, onAnswer }: { q: WrittenQuestion; tag?: string; langs: Langs; onAnswer: (ok: boolean) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState('');
   const [verdict, setVerdict] = useState<Verdict | null>(null);
   const [skipped, setSkipped] = useState(false);
@@ -268,7 +307,7 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
 
   return (
     <div className="q">
-      <PromptCard side={q.promptSide} text={q.prompt} tag={tag} />
+      <PromptCard side={q.promptSide} text={q.prompt} tag={tag} lang={langs.prompt} />
       <form
         className="write"
         onSubmit={(e) => {
@@ -289,6 +328,7 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
         <div className={`write__row${verdict ? ` is-${verdict.result}` : ''}`}>
           <input
             id="answer-input"
+            ref={inputRef}
             className="input write__input"
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -307,6 +347,8 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
             </button>
           )}
         </div>
+
+        <AccentBar chars={accentsFor(langs.answer)} inputRef={inputRef} value={value} onChange={setValue} disabled={answered} />
 
         <div className="feedback-slot" aria-live="polite">
           {!answered && (
@@ -331,7 +373,9 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
             <div className={`feedback ${verdict?.result === 'almost' ? 'feedback--almost' : 'feedback--bad'}`}>
               <div className="feedback__text">
                 <strong>{skipped ? 'Kein Problem – merk dir:' : verdict?.result === 'almost' ? verdict.hint : 'Nicht ganz. Richtig ist:'}</strong>
-                <span className="feedback__answer">{q.answer}</span>
+                <span className="feedback__answer">
+                {q.answer} <SpeakButton text={q.answer} lang={langs.answer} />
+              </span>
                 {!skipped && (
                   <span className="feedback__yours">
                     Deine Antwort: <s>{value}</s>
@@ -364,7 +408,7 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
 }
 
 // ---------- Selbst prüfen (lange Antworten) ----------
-function SelfCheckView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; onAnswer: (ok: boolean) => void }) {
+function SelfCheckView({ q, tag, langs, onAnswer }: { q: WrittenQuestion; tag?: string; langs: Langs; onAnswer: (ok: boolean) => void }) {
   const [revealed, setRevealed] = useState(false);
   const answerSide: Side = q.promptSide === 'term' ? 'definition' : 'term';
 
@@ -384,7 +428,7 @@ function SelfCheckView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string;
 
   return (
     <div className="q">
-      <PromptCard side={q.promptSide} text={q.prompt} tag={tag} />
+      <PromptCard side={q.promptSide} text={q.prompt} tag={tag} lang={langs.prompt} />
       <p className="q__instr">
         {revealed ? 'Hast du es gewusst?' : `Sag dir ${answerSide === 'term' ? 'den Begriff' : 'die Definition'} im Kopf, dann deck auf.`}
       </p>
@@ -397,6 +441,7 @@ function SelfCheckView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string;
           <div className="pcard pcard--answer" aria-live="polite">
             <div className="pcard__head">
               <span className="pcard__label">{sideLabel(answerSide)}</span>
+              <SpeakButton text={q.answer} lang={langs.answer} />
             </div>
             <p className={`pcard__text ${textSize(q.answer)}`}>{q.answer}</p>
           </div>
@@ -504,13 +549,26 @@ function DoneView({ state, ctx, setId, scope }: { state: LearnState; ctx: LearnC
   );
 }
 
-function NothingToLearn({ ctx, setId, scope }: { ctx: LearnContext; setId?: string; scope: LearnScope }) {
+function NothingToLearn({ ctx, setId, scope, filtered }: { ctx: LearnContext; setId?: string; scope: LearnScope; filtered: boolean }) {
   const data = useData();
   const now = useNow();
   const cards = [...ctx.cards.values()].map((x) => x.card);
   const stats = boxStats(cards, data.progress, now);
   const back = setId ? `#/set/${setId}` : '#/';
 
+  if (cards.length === 0 && filtered) {
+    return (
+      <section className="done">
+        <h1 className="display done__title">Nichts zu üben</h1>
+        <p className="done__text">Bisher hattest du hier keine Karte falsch. Stark!</p>
+        <div className="done__actions">
+          <a className="btn btn--ink btn--lg" href={back}>
+            Zurück zum Set
+          </a>
+        </div>
+      </section>
+    );
+  }
   if (cards.length === 0) {
     return (
       <section className="done">

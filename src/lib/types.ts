@@ -24,6 +24,8 @@ export interface StudySet {
   title: string;
   description: string;
   color: SetColor;
+  termLang: string; // z. B. 'fr-FR', '' = keine
+  defLang: string;
   cards: Card[];
   createdAt: number;
   updatedAt: number;

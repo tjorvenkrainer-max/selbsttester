@@ -7,6 +7,7 @@ import type { Side, StudySet } from '../lib/types';
 import { useKeys, useTitle } from '../hooks';
 import { FocusBar } from '../components/FocusBar';
 import { NotFound } from '../components/common';
+import { SpeakButton } from '../components/SpeakButton';
 import './Flashcards.css';
 
 export function Flashcards({ id }: { id: string }) {
@@ -35,6 +36,8 @@ function Deck({ set, front }: { set: StudySet; front: Side }) {
 
   const back: Side = front === 'term' ? 'definition' : 'term';
   const card = byId.get(order[index]);
+  const langOf = (side: Side) => (side === 'term' ? set.termLang : set.defLang);
+  const visible: Side = flipped ? back : front;
 
   const go = (delta: number) => {
     const next = index + delta;
@@ -184,8 +187,11 @@ function Deck({ set, front }: { set: StudySet; front: Side }) {
 
               {sorting ? (
                 <div className="deck__nav deck__nav--sort">
-                  <span className="deck__count mono" aria-live="polite">
-                    {index + 1} / {order.length}
+                  <span className="deck__mid">
+                    <span className="deck__count mono" aria-live="polite">
+                      {index + 1} / {order.length}
+                    </span>
+                    <SpeakButton text={card[visible]} lang={langOf(visible)} />
                   </span>
                   <button type="button" className="btn btn--lg deck__no" onClick={() => mark(false)}>
                     <X aria-hidden="true" /> Noch nicht
@@ -199,8 +205,11 @@ function Deck({ set, front }: { set: StudySet; front: Side }) {
                   <button type="button" className="btn btn--icon btn--lg" onClick={() => go(-1)} disabled={index === 0} aria-label="Vorherige Karte">
                     <ChevronLeft aria-hidden="true" />
                   </button>
-                  <span className="deck__count mono" aria-live="polite">
-                    {index + 1} / {order.length}
+                  <span className="deck__mid">
+                    <span className="deck__count mono" aria-live="polite">
+                      {index + 1} / {order.length}
+                    </span>
+                    <SpeakButton text={card[visible]} lang={langOf(visible)} />
                   </span>
                   <button type="button" className="btn btn--icon btn--lg" onClick={() => go(1)} aria-label="Nächste Karte">
                     <ChevronRight aria-hidden="true" />

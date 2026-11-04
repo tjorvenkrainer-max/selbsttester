@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Brain, ClipboardCheck, Download, Layers, Pencil, RotateCcw, Shapes, Trash2 } from 'lucide-react';
+import { ArrowLeft, Brain, Flame, ClipboardCheck, Download, Layers, Pencil, RotateCcw, Shapes, Trash2 } from 'lucide-react';
 import { deleteSet, resetSetProgress, useData } from '../lib/store';
-import { STATUS_LABEL, boxStats, cardStatus, type CardStatus } from '../lib/srs';
+import { STATUS_LABEL, boxStats, cardStatus, hardCardIds, type CardStatus } from '../lib/srs';
 import { downloadText, plural, relativeDay, slugify } from '../lib/format';
 import { navigate } from '../router';
 import { useNow, useTitle } from '../hooks';
@@ -23,6 +23,7 @@ export function SetPage({ id }: { id: string }) {
   if (!set || !stats) return <NotFound what="Set" />;
 
   const n = set.cards.length;
+  const hard = hardCardIds(set.cards, data.progress).length;
   const rows = set.cards
     .map((c) => ({ card: c, status: cardStatus(data.progress[c.id], now), box: data.progress[c.id]?.box ?? 0 }))
     .filter((r) => filter === 'all' || r.status === filter);
@@ -93,6 +94,15 @@ export function SetPage({ id }: { id: string }) {
             <span className="mode__desc">Paare finden – auf Zeit.</span>
           </a>
         </nav>
+      )}
+
+      {!disabled && hard > 0 && (
+        <a className="hardlink" href={`${base}/lernen/schwierig`}>
+          <Flame aria-hidden="true" />
+          <span>
+            <strong>Schwierige üben</strong> – {plural(hard, 'Karte', 'Karten')}, die du schon mal falsch hattest
+          </span>
+        </a>
       )}
 
       {!disabled && (

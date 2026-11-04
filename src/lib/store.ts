@@ -39,6 +39,15 @@ export function removeOldDemo(d: AppData): AppData {
 
 /** Fügt eingebaute Sets hinzu, die noch nie da waren (gelöschte kommen nicht zurück) */
 export function withPresets(d: AppData): AppData {
+  // eingebaute Sets, die schon da sind, bekommen fehlende Sprachen nachgetragen
+  let sets = d.sets;
+  if (!d.seeded.includes('sprachen')) for (const p of PRESET_SETS) {
+    const cur = sets.find((s) => s.id === p.id);
+    if (cur && !cur.termLang && !cur.defLang) {
+      sets = sets.map((s) => (s.id === p.id ? { ...s, termLang: p.termLang, defLang: p.defLang } : s));
+    }
+  }
+  if (!d.seeded.includes('sprachen')) d = { ...d, sets, seeded: [...d.seeded, 'sprachen'] };
   const missing = PRESET_SETS.filter((p) => !d.seeded.includes(p.id));
   if (!missing.length) return d;
   const add = missing.filter((p) => !d.sets.some((s) => s.id === p.id));
@@ -112,6 +121,8 @@ export interface SetInput {
   title: string;
   description: string;
   color: SetColor;
+  termLang: string;
+  defLang: string;
   cards: { id?: string; term: string; definition: string }[];
 }
 
@@ -137,6 +148,8 @@ export function saveSet(input: SetInput): string {
       title: input.title.trim(),
       description: input.description.trim(),
       color: input.color,
+      termLang: input.termLang,
+      defLang: input.defLang,
       cards,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,

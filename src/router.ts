@@ -6,7 +6,7 @@ export type Route =
   | { name: 'new'; openImport: boolean }
   | { name: 'set'; id: string }
   | { name: 'edit'; id: string }
-  | { name: 'learn'; id: string; practice: boolean }
+  | { name: 'learn'; id: string; practice: boolean; only?: 'hard' | string[] }
   | { name: 'review' }
   | { name: 'cards'; id: string }
   | { name: 'test'; id: string }
@@ -29,6 +29,11 @@ export function parseHash(hash: string): Route {
       case 'bearbeiten':
         return { name: 'edit', id };
       case 'lernen':
+        if (parts[3] === 'schwierig') return { name: 'learn', id, practice: true, only: 'hard' };
+        if (parts[3] === 'auswahl') {
+          const ids = (new URLSearchParams(query).get('k') ?? '').split(',').filter(Boolean);
+          return { name: 'learn', id, practice: true, only: ids };
+        }
         return { name: 'learn', id, practice: parts[3] === 'alles' };
       case 'karteikarten':
         return { name: 'cards', id };

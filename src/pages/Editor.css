@@ -52,6 +52,23 @@
   }
 }
 
+.editor__langs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.editor__langhint {
+  grid-column: 1 / -1;
+  margin-top: -4px;
+}
+
+@media (min-width: 768px) {
+  .editor__langs {
+    grid-column: 1 / -1;
+  }
+}
+
 .editor__titleinput {
   font-size: 1.25rem;
   font-weight: 700;
