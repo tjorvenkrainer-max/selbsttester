@@ -1,4 +1,4 @@
-// Eingefügten Text in Karten zerlegen (z. B. Export aus Quizlet oder Anki: Begriff<Tab>Definition pro Zeile)
+// Eingefügten Text in Karten zerlegen (z. B. Export aus einer anderen Lernkarten-App: Begriff<Tab>Definition pro Zeile)
 
 export type TermSep = 'tab' | 'dash' | 'equals' | 'colon' | 'semicolon' | 'comma' | 'custom';
 export type CardSep = 'newline' | 'blankline' | 'semicolon' | 'custom';

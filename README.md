@@ -12,7 +12,7 @@ Test machen, Paare zuordnen. Läuft komplett im Browser – kein Server, kein Ac
 - **Karteikarten** – umdrehen (Leertaste/Tippen), blättern (Pfeile/Wischen), sortieren in gewusst / noch nicht.
 - **Test** – Wahr/Falsch, Auswahl, Schreiben. Auswertung im Rotstift-Stil.
 - **Zuordnen** – 6 Paare auf Zeit, Bestzeit pro Set.
-- **Import** – Liste einfügen (Tab, „ - “, „=“, „:“ …), z. B. ein Export aus Quizlet oder Anki.
+- **Import** – Liste einfügen (Tab, „ - “, „=“, „:“ …), z. B. ein Export aus einer anderen Lernkarten-App.
 - **Backup** – alles als JSON herunterladen und wieder laden (auch zum Umziehen auf ein anderes Gerät).
 - Dunkelmodus, Tastaturkürzel, offline nutzbar (nach dem ersten Öffnen, wenn die Seite über https läuft).
 
@@ -29,7 +29,13 @@ npm run dev
 npm test
 ```
 
-## Auf die eigene Webseite
+## Veröffentlichen mit GitHub Pages (automatisch)
+
+Jeder Push auf `main` baut die App und stellt sie online (`.github/workflows/deploy.yml`). Einmalig einschalten:
+Repo → **Settings → Pages → Build and deployment → Source: GitHub Actions**. Danach unter **Actions →
+„Seite veröffentlichen“ → Run workflow** starten. Adresse: `https://tjorvenkrainer-max.github.io/<repo-name>/`
+
+## Auf einen eigenen Webspace
 
 ```bash
 npm run build
@@ -37,7 +43,7 @@ npm run build
 
 Den Inhalt von `dist/` auf den Webspace hochladen – ins Hauptverzeichnis oder in einen Unterordner
 (z. B. `deine-seite.at/lernen/`). Keine Server-Konfiguration nötig (Hash-Routing, relative Pfade).
-Kostenlos geht's auch mit GitHub Pages, Netlify oder Cloudflare Pages.
+Die App ist auf `noindex` gestellt und taucht nicht bei Google auf.
 
 **Wichtig:** Die Daten liegen im Browser (localStorage) – pro Gerät und pro Adresse. Vor einem Umzug auf eine
 neue Adresse in den Einstellungen ein Backup herunterladen und dort wieder laden.

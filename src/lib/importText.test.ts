@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { detectSeparators, parseImport } from './importText';
 
 describe('Import', () => {
-  it('liest Tab-getrennte Zeilen (Quizlet-/Anki-Export)', () => {
+  it('liest Tab-getrennte Zeilen (typischer App-Export)', () => {
     const text = 'dog\tder Hund\r\ncat\tdie Katze\n\nbird\tder Vogel';
     expect(detectSeparators(text)).toEqual({ term: 'tab', card: 'newline' });
     expect(parseImport(text, 'tab', 'newline')).toEqual([

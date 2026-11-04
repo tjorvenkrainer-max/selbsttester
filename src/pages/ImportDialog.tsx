@@ -59,8 +59,8 @@ export function ImportDialog({
           placeholder={'house - das Haus\nto run - laufen'}
         />
         <p className="field-hint">
-          Pro Zeile eine Karte. Begriff und Definition getrennt durch Tab, „ - “, „=“ oder „:“. Exporte aus Quizlet oder Anki
-          (Tab-getrennt) gehen direkt.
+          Pro Zeile eine Karte. Begriff und Definition getrennt durch Tab, „ - “, „=“ oder „:“. Exporte aus anderen
+          Lernkarten-Apps (Tab-getrennt) gehen direkt.
         </p>
       </div>
 
