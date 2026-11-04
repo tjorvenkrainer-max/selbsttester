@@ -258,7 +258,6 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
   const autoNext = ok && !verdict?.hint;
 
   useAutoAdvance(autoNext, 1100, () => onAnswer(true));
-  useAutoAdvance(skipped, 1800, () => onAnswer(false)); // übersprungen: richtige Antwort kurz zeigen, dann weiter
 
   const skip = () => {
     setSkipped(true);
