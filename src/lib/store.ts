@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react';
 import { STORAGE_KEY } from '../config';
 import { defaultData, loadData, sanitize, saveData } from './storage';
 import { demoSet } from './demo';
+import { PRESET_SETS } from './presets';
 import { normalize } from './answer';
 import { uid } from './random';
 import type { AppData, CardProgress, SetColor, Settings, StudySet } from './types';
@@ -17,10 +18,20 @@ let timer: ReturnType<typeof setTimeout> | undefined;
 {
   const loaded = loadData();
   data = loaded.data;
-  if (loaded.fresh) {
-    data = { ...data, sets: [demoSet()] };
+  if (loaded.fresh) data = { ...data, sets: [demoSet()] };
+  const next = withPresets(data);
+  if (loaded.fresh || next !== data) {
+    data = next;
     saveData(data);
   }
+}
+
+/** Fügt eingebaute Sets hinzu, die noch nie da waren (gelöschte kommen nicht zurück) */
+export function withPresets(d: AppData): AppData {
+  const missing = PRESET_SETS.filter((p) => !d.seeded.includes(p.id));
+  if (!missing.length) return d;
+  const add = missing.filter((p) => !d.sets.some((s) => s.id === p.id));
+  return { ...d, sets: [...add, ...d.sets], seeded: [...d.seeded, ...missing.map((p) => p.id)] };
 }
 
 function emit() {
@@ -165,5 +176,5 @@ export function replaceAll(next: AppData) {
 }
 
 export function clearAll() {
-  update((d) => ({ ...defaultData(), settings: d.settings }));
+  update((d) => ({ ...defaultData(), seeded: d.seeded, settings: d.settings }));
 }

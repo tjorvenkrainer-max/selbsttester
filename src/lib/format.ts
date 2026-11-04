@@ -5,8 +5,9 @@ export const plural = (n: number, one: string, many: string) => `${n} ${n === 1 
 const dateFmt = new Intl.DateTimeFormat('de-AT', { day: 'numeric', month: 'long' });
 const longDateFmt = new Intl.DateTimeFormat('de-AT', { weekday: 'long', day: 'numeric', month: 'long' });
 
-export const formatDate = (ts: number) => dateFmt.format(ts);
-export const formatLongDate = (ts: number) => longDateFmt.format(ts);
+const safe = (fmt: Intl.DateTimeFormat, ts: number) => (Number.isFinite(new Date(ts).getTime()) ? fmt.format(ts) : '–');
+export const formatDate = (ts: number) => safe(dateFmt, ts);
+export const formatLongDate = (ts: number) => safe(longDateFmt, ts);
 
 /** „heute“, „morgen“, „übermorgen“, „in 5 Tagen“, „am 12. Dezember“ (nach Lerntagen ab 4 Uhr) */
 export function relativeDay(ts: number, now = Date.now()): string {

@@ -3,9 +3,10 @@ import { STORAGE_KEY, THEME_KEY } from '../config';
 import { DEFAULT_SETTINGS, SET_COLORS, type AppData, type Card, type CardProgress, type Settings, type StudySet } from './types';
 
 export function defaultData(): AppData {
-  return { version: 1, sets: [], progress: {}, bestMatch: {}, settings: { ...DEFAULT_SETTINGS } };
+  return { version: 1, sets: [], progress: {}, bestMatch: {}, seeded: [], settings: { ...DEFAULT_SETTINGS } };
 }
 
+const MAX_DATE = 8.64e15; // größtes gültiges Datum in JavaScript
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
 const num = (x: unknown, fallback = 0) => (typeof x === 'number' && Number.isFinite(x) ? x : fallback);
 const str = (x: unknown, fallback = '') => (typeof x === 'string' ? x : fallback);
@@ -36,7 +37,7 @@ function cleanProgress(raw: unknown): Record<string, CardProgress> {
     out[id] = {
       level: level === 1 || level === 2 ? level : 0,
       box: Math.min(Math.max(Math.round(num(p.box)), 0), 5),
-      due: num(p.due),
+      due: Math.min(Math.max(num(p.due), 0), MAX_DATE), // ungültige Daten würden die Datumsanzeige abstürzen lassen
       seen: num(p.seen),
       correct: num(p.correct),
       wrong: num(p.wrong),
@@ -65,7 +66,8 @@ export function sanitize(raw: unknown): AppData | null {
   const sets = raw.sets.map(cleanSet).filter((s): s is StudySet => s !== null);
   const bestMatch: Record<string, number> = {};
   if (isObj(raw.bestMatch)) for (const [k, v] of Object.entries(raw.bestMatch)) if (num(v) > 0) bestMatch[k] = num(v);
-  return { version: 1, sets, progress: cleanProgress(raw.progress), bestMatch, settings: cleanSettings(raw.settings) };
+  const seeded = Array.isArray(raw.seeded) ? raw.seeded.filter((x): x is string => typeof x === 'string') : [];
+  return { version: 1, sets, progress: cleanProgress(raw.progress), bestMatch, seeded, settings: cleanSettings(raw.settings) };
 }
 
 export function loadData(): { data: AppData; fresh: boolean } {

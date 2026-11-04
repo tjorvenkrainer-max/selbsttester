@@ -59,6 +59,7 @@ export interface AppData {
   sets: StudySet[];
   progress: Record<string, CardProgress>; // Schlüssel = Karten-ID
   bestMatch: Record<string, number>; // Schlüssel = `${setId}:${paare}` → Bestzeit in ms
+  seeded: string[]; // IDs eingebauter Sets, die schon einmal hinzugefügt wurden
   settings: Settings;
 }
 
