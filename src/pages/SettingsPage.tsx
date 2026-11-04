@@ -88,6 +88,10 @@ export function SettingsPage() {
           onChange={(v) => updateSettings({ roundSize: Number(v) })}
           options={['5', '7', '10', '15'].map((v) => ({ value: v, label: v }))}
         />
+        <label className="check">
+          <input type="checkbox" checked={s.sound} onChange={(e) => updateSettings({ sound: e.target.checked })} />
+          Töne bei richtig und falsch (Lernen, Zuordnen)
+        </label>
       </section>
 
       <section className="panel settings__section" aria-labelledby="s-data">

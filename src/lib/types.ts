@@ -52,6 +52,7 @@ export interface Settings {
   answerWith: AnswerWith;
   roundSize: number;
   cardFront: Side;
+  sound: boolean; // Töne bei richtig/falsch
 }
 
 export interface AppData {
@@ -69,4 +70,5 @@ export const DEFAULT_SETTINGS: Settings = {
   answerWith: 'term',
   roundSize: 7,
   cardFront: 'term',
+  sound: true,
 };

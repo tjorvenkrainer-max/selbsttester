@@ -57,6 +57,7 @@ function cleanSettings(raw: unknown): Settings {
     answerWith: pick(s.answerWith, ['term', 'definition', 'mixed'], DEFAULT_SETTINGS.answerWith),
     roundSize: Math.min(Math.max(Math.round(num(s.roundSize, DEFAULT_SETTINGS.roundSize)), 3), 20),
     cardFront: pick(s.cardFront, ['term', 'definition'], DEFAULT_SETTINGS.cardFront),
+    sound: typeof s.sound === 'boolean' ? s.sound : DEFAULT_SETTINGS.sound,
   };
 }
 

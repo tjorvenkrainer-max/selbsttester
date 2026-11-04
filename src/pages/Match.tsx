@@ -6,6 +6,7 @@ import { shuffle } from '../lib/random';
 import { formatTime } from '../lib/format';
 import type { Card, Side, StudySet } from '../lib/types';
 import { useTitle } from '../hooks';
+import { playCorrect, playWrong } from '../lib/sound';
 import { FocusBar } from '../components/FocusBar';
 import { NotFound } from '../components/common';
 import './Match.css';
@@ -109,6 +110,7 @@ function MatchGame({ set, best }: { set: StudySet; best: Record<string, number> 
       const next = new Set(matched).add(tile.cardId);
       setMatched(next);
       setAnnounce(`Passt: ${first.text} – ${tile.text}`);
+      playCorrect();
       if (next.size === tiles.length / 2) {
         const ms = performance.now() - startAt + penalty;
         const record = submitMatchTime(bestKey, ms);
@@ -119,6 +121,7 @@ function MatchGame({ set, best }: { set: StudySet; best: Record<string, number> 
       setWrong([first.id, tile.id]);
       setPenalty((p) => p + PENALTY_MS);
       setAnnounce('Passt nicht – plus eine Sekunde.');
+      playWrong();
     }
   };
 

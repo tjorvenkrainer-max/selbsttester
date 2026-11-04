@@ -20,6 +20,7 @@ import { boxStats } from '../lib/srs';
 import { plural, relativeDay } from '../lib/format';
 import type { AnswerWith, QuestionTypes, Side } from '../lib/types';
 import { useKeys, useNow, useTitle } from '../hooks';
+import { playCorrect, playWrong } from '../lib/sound';
 import { FocusBar } from '../components/FocusBar';
 import { Karteikasten } from '../components/Karteikasten';
 import { NotFound, Segmented, Sheet } from '../components/common';
@@ -175,12 +176,18 @@ function McView({ q, tag, onAnswer }: { q: McQuestion; tag?: string; onAnswer: (
 
   useAutoAdvance(answered && ok, 900, () => onAnswer(true));
 
+  const choose = (i: number) => {
+    setPicked(i);
+    if (i === q.correct) playCorrect();
+    else playWrong();
+  };
+
   useKeys((e) => {
     if (!answered) {
       const n = Number(e.key);
       if (n >= 1 && n <= q.options.length) {
         e.preventDefault();
-        setPicked(n - 1);
+        choose(n - 1);
       }
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -198,7 +205,7 @@ function McView({ q, tag, onAnswer }: { q: McQuestion; tag?: string; onAnswer: (
         {q.options.map((o, i) => {
           const cls = !answered ? '' : i === q.correct ? ' is-correct' : i === picked ? ' is-wrong' : ' is-dim';
           return (
-            <button key={i} type="button" className={`option${cls}`} disabled={answered} onClick={() => setPicked(i)} aria-keyshortcuts={String(i + 1)}>
+            <button key={i} type="button" className={`option${cls}`} disabled={answered} onClick={() => choose(i)} aria-keyshortcuts={String(i + 1)}>
               <span className="option__key kbd" aria-hidden="true">
                 {i + 1}
               </span>
@@ -212,7 +219,7 @@ function McView({ q, tag, onAnswer }: { q: McQuestion; tag?: string; onAnswer: (
 
       <div className="feedback-slot" aria-live="polite">
         {!answered && (
-          <button type="button" className="linkbtn" onClick={() => setPicked(-1)}>
+          <button type="button" className="linkbtn" onClick={() => choose(-1)}>
             Weiß ich nicht
           </button>
         )}
@@ -251,6 +258,12 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
   const autoNext = ok && !verdict?.hint;
 
   useAutoAdvance(autoNext, 1100, () => onAnswer(true));
+  useAutoAdvance(skipped, 1800, () => onAnswer(false)); // übersprungen: richtige Antwort kurz zeigen, dann weiter
+
+  const skip = () => {
+    setSkipped(true);
+    playWrong();
+  };
 
   const answerSide: Side = q.promptSide === 'term' ? 'definition' : 'term';
 
@@ -262,7 +275,13 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
         onSubmit={(e) => {
           e.preventDefault();
           if (answered) onAnswer(ok);
-          else if (value.trim()) setVerdict(checkAnswer(value, q.answer));
+          else if (!value.trim()) skip(); // Enter ohne Eingabe = weiß ich nicht
+          else {
+            const v = checkAnswer(value, q.answer);
+            setVerdict(v);
+            if (v.result === 'correct') playCorrect();
+            else playWrong();
+          }
         }}
       >
         <label className="q__instr" htmlFor="answer-input">
@@ -281,10 +300,10 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
             autoCapitalize="off"
             spellCheck={false}
             enterKeyHint={answered ? 'next' : 'done'}
-            placeholder="Deine Antwort"
+            placeholder="Antwort – oder leer lassen und Enter"
           />
           {!answered && (
-            <button type="submit" className="btn btn--ink" disabled={!value.trim()}>
+            <button type="submit" className="btn btn--ink">
               Antworten
             </button>
           )}
@@ -292,7 +311,7 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
 
         <div className="feedback-slot" aria-live="polite">
           {!answered && (
-            <button type="button" className="linkbtn" onClick={() => setSkipped(true)}>
+            <button type="button" className="linkbtn" onClick={skip}>
               Weiß ich nicht
             </button>
           )}
@@ -322,7 +341,14 @@ function WrittenView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string; o
               </div>
               <div className="feedback__actions">
                 {!skipped && (
-                  <button type="button" className="btn btn--sm" onClick={() => onAnswer(true)}>
+                  <button
+                    type="button"
+                    className="btn btn--sm"
+                    onClick={() => {
+                      playCorrect();
+                      onAnswer(true);
+                    }}
+                  >
                     Ich hatte recht
                   </button>
                 )}
@@ -352,6 +378,7 @@ function SelfCheckView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string;
       onAnswer(false);
     } else if (revealed && (e.key === '2' || e.key === 'ArrowRight')) {
       e.preventDefault();
+      playCorrect();
       onAnswer(true);
     }
   });
@@ -378,7 +405,15 @@ function SelfCheckView({ q, tag, onAnswer }: { q: WrittenQuestion; tag?: string;
             <button type="button" className="btn btn--lg selfcheck__no" onClick={() => onAnswer(false)}>
               <X aria-hidden="true" /> Nicht gewusst <span className="kbd">1</span>
             </button>
-            <button type="button" className="btn btn--lg selfcheck__yes" autoFocus onClick={() => onAnswer(true)}>
+            <button
+              type="button"
+              className="btn btn--lg selfcheck__yes"
+              autoFocus
+              onClick={() => {
+                playCorrect();
+                onAnswer(true);
+              }}
+            >
               <Check aria-hidden="true" /> Gewusst <span className="kbd">2</span>
             </button>
           </div>
@@ -520,6 +555,7 @@ function LearnSettings({ onClose, onApply }: { onClose: () => void; onApply: () 
   const [questionTypes, setQuestionTypes] = useState<QuestionTypes>(s.questionTypes);
   const [answerWith, setAnswerWith] = useState<AnswerWith>(s.answerWith);
   const [roundSize, setRoundSize] = useState(String(s.roundSize));
+  const [sound, setSound] = useState(s.sound);
   return (
     <Sheet
       open
@@ -534,7 +570,7 @@ function LearnSettings({ onClose, onApply }: { onClose: () => void; onApply: () 
             type="button"
             className="btn btn--ink"
             onClick={() => {
-              updateSettings({ questionTypes, answerWith, roundSize: Number(roundSize) });
+              updateSettings({ questionTypes, answerWith, roundSize: Number(roundSize), sound });
               onClose();
               onApply();
             }}
@@ -573,6 +609,10 @@ function LearnSettings({ onClose, onApply }: { onClose: () => void; onApply: () 
         onChange={setRoundSize}
         options={['5', '7', '10', '15'].map((v) => ({ value: v, label: v }))}
       />
+      <label className="check">
+        <input type="checkbox" checked={sound} onChange={(e) => setSound(e.target.checked)} />
+        Töne bei richtig und falsch
+      </label>
       <p className="field-hint">Übernehmen startet die Sitzung neu. Was du schon gelernt hast, bleibt gespeichert.</p>
     </Sheet>
   );
