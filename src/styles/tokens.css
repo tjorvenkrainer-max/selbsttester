@@ -1,0 +1,130 @@
+/* Design-Tokens: Schulheft – Karopapier, Tinte, Textmarker, Karteikarte */
+:root {
+  color-scheme: light;
+
+  --desk: #f2f4f8; /* Karopapier */
+  --grid: #e3e8f0; /* Karo-Linien */
+  --paper: #ffffff; /* Karten und Flächen */
+  --paper-sunk: #f5f7fa;
+  --ink: #172033; /* Tinte */
+  --ink-soft: #465066;
+  --ink-faint: #5b667c;
+  --line: #d6dce6;
+  --line-strong: #a9b4c5;
+  --field-border: #7f8ca0; /* Rahmen von Eingabefeldern: mind. 3:1 */
+
+  --marker: #ffe14d; /* Textmarker */
+  --marker-strong: #e9c200;
+  --marker-ink: #172033;
+
+  --rule-blue: #c5d6ee; /* Linien der Karteikarte */
+  --rule-red: #e0525c; /* rote Kopflinie */
+
+  --correct: #12753f;
+  --correct-bg: #e1f3e8;
+  --wrong: #bd2834;
+  --wrong-bg: #fbe6e8;
+  --almost: #8a5200;
+  --almost-bg: #fff0d1;
+  --focus: #2457d6;
+
+  --box: #233049; /* Front des Karteikastens */
+  --box-ink: #f2f4f8;
+
+  --st-new: #8b95a8;
+  --st-learning: #ef8a2c;
+  --st-known: #2c9a5d;
+  --st-due: #f5cd00;
+
+  /* Fachfarben für Sets (wie Heftumschläge) */
+  --c-rot: #e0484f;
+  --c-orange: #ee8a2d;
+  --c-gelb: #e6b800;
+  --c-gruen: #3c9a5e;
+  --c-tuerkis: #1f979d;
+  --c-blau: #3a6fd4;
+  --c-violett: #8157c6;
+  --c-grau: #6f7a8d;
+
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --shadow-1: 0 1px 0 rgb(23 32 51 / 0.05), 0 1px 3px rgb(23 32 51 / 0.08);
+  --shadow-2: 0 1px 0 rgb(23 32 51 / 0.05), 0 10px 28px rgb(23 32 51 / 0.12);
+
+  --font-display: 'Shantell Sans Variable', 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible Next Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Atkinson Hyperlegible Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --desk: #0f141d;
+    --grid: #182030;
+    --paper: #1a2232;
+    --paper-sunk: #141b28;
+    --ink: #e8ecf3;
+    --ink-soft: #b5bfcf;
+    --ink-faint: #9ea9bb;
+    --line: #2a3446;
+    --line-strong: #46536b;
+    --field-border: #6b7a93;
+    --marker: #ffe14d;
+    --marker-strong: #ffd21a;
+    --marker-ink: #172033;
+    --rule-blue: #2a3c5a;
+    --rule-red: #cf545e;
+    --correct: #5fd394;
+    --correct-bg: #12301f;
+    --wrong: #ff8a93;
+    --wrong-bg: #3a161b;
+    --almost: #ffc266;
+    --almost-bg: #3a2a10;
+    --focus: #8fb2ff;
+    --box: #34435f;
+    --box-ink: #e8ecf3;
+    --st-new: #7d889c;
+    --st-learning: #f3994a;
+    --st-known: #45b877;
+    --st-due: #ffd84a;
+    --shadow-1: 0 1px 0 rgb(0 0 0 / 0.3);
+    --shadow-2: 0 10px 28px rgb(0 0 0 / 0.4);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --desk: #0f141d;
+  --grid: #182030;
+  --paper: #1a2232;
+  --paper-sunk: #141b28;
+  --ink: #e8ecf3;
+  --ink-soft: #b5bfcf;
+  --ink-faint: #9ea9bb;
+  --line: #2a3446;
+  --line-strong: #46536b;
+  --field-border: #6b7a93;
+  --marker: #ffe14d;
+  --marker-strong: #ffd21a;
+  --marker-ink: #172033;
+  --rule-blue: #2a3c5a;
+  --rule-red: #cf545e;
+  --correct: #5fd394;
+  --correct-bg: #12301f;
+  --wrong: #ff8a93;
+  --wrong-bg: #3a161b;
+  --almost: #ffc266;
+  --almost-bg: #3a2a10;
+  --focus: #8fb2ff;
+  --box: #34435f;
+  --box-ink: #e8ecf3;
+  --st-new: #7d889c;
+  --st-learning: #f3994a;
+  --st-known: #45b877;
+  --st-due: #ffd84a;
+  --shadow-1: 0 1px 0 rgb(0 0 0 / 0.3);
+  --shadow-2: 0 10px 28px rgb(0 0 0 / 0.4);
+}

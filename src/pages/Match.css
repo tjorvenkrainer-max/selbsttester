@@ -1,0 +1,150 @@
+.match {
+  max-width: 900px;
+  margin-inline: auto;
+  padding: 24px 16px 56px;
+}
+
+.match__intro {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+  max-width: 560px;
+}
+
+.match__title {
+  font-size: clamp(2rem, 6vw, 2.8rem);
+}
+
+.match__text {
+  font-size: 1.0625rem;
+  color: var(--ink-soft);
+}
+
+.match__best {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.match__best svg {
+  width: 20px;
+  height: 20px;
+  color: var(--marker-strong);
+}
+
+.match__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.match__timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-weight: 700;
+}
+
+.match__timer svg {
+  width: 18px;
+  height: 18px;
+}
+
+.match__penalty {
+  margin-top: 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--wrong);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+}
+
+.tile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* Text darf nicht breiter als die Kachel werden */
+  align-items: center;
+  min-height: 108px;
+  padding: 10px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: var(--shadow-1);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  white-space: pre-line;
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  cursor: pointer;
+  transition:
+    transform 0.15s var(--ease-out),
+    border-color 0.15s,
+    opacity 0.3s,
+    visibility 0.3s;
+}
+
+@media (min-width: 768px) {
+  .tile {
+    min-height: 130px;
+    font-size: 1.125rem;
+  }
+}
+
+/* Definitionen mit roter Kopflinie – so sieht man sofort, welche Seite es ist */
+.tile--def {
+  border-top: 4px solid var(--rule-red);
+  font-weight: 600;
+}
+
+.tile.is-m {
+  font-size: 0.9375rem;
+}
+
+.tile.is-s {
+  font-size: 0.8125rem;
+}
+
+.tile.is-xs {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.tile:hover:not(:disabled) {
+  border-color: var(--ink);
+  transform: translateY(-2px);
+}
+
+.tile.is-selected {
+  border-color: var(--marker-strong);
+  background: var(--marker);
+  color: var(--marker-ink);
+  transform: translateY(-2px);
+}
+
+.tile.is-wrong {
+  border-color: var(--wrong);
+  background: var(--wrong-bg);
+  animation: shake 0.35s;
+}
+
+.tile.is-gone {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.92);
+  cursor: default;
+}

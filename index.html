@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Tjorvens Lernkarten: Karteikarten, Lernmodus mit Karteikasten-System, Test und Zuordnen." />
+    <meta name="theme-color" content="#f2f4f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f141d" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <title>Tjorven lernt</title>
+    <script>
+      // Farbschema vor dem ersten Zeichnen setzen (kein Aufblitzen)
+      try {
+        var t = localStorage.getItem('tjorven-lernt:theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

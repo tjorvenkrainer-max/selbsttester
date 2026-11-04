@@ -1,0 +1,274 @@
+.test {
+  display: grid;
+  gap: 18px;
+  max-width: 800px;
+  margin-inline: auto;
+  padding: 24px 16px 64px;
+}
+
+.test__setup {
+  display: grid;
+  gap: 20px;
+  justify-items: start;
+}
+
+.test__title {
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+}
+
+.test__setup > div,
+.test__setup .fieldset {
+  width: 100%;
+}
+
+.test__range {
+  width: 100%;
+  max-width: 420px;
+  accent-color: var(--ink);
+}
+
+/* Testblatt: kariert wie eine Schularbeit */
+.paper {
+  display: grid;
+  gap: 22px;
+  padding: 20px 18px 24px 30px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background-color: var(--paper);
+  background-image: linear-gradient(90deg, transparent 17px, var(--rule-red) 17px, var(--rule-red) 19px, transparent 19px);
+  box-shadow: var(--shadow-2);
+}
+
+@media (min-width: 768px) {
+  .paper {
+    padding: 28px 32px 32px 52px;
+    background-image: linear-gradient(90deg, transparent 30px, var(--rule-red) 30px, var(--rule-red) 32px, transparent 32px);
+  }
+}
+
+.paper__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid var(--line-strong);
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+}
+
+.paper__hand {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.paper__subject {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.paper__section {
+  display: grid;
+  gap: 12px;
+}
+
+.paper__sectiontitle {
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.paper__list {
+  display: grid;
+  gap: 18px;
+}
+
+.tq {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr);
+  gap: 6px;
+}
+
+.tq__nr {
+  padding-top: 2px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.tq__body {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tq__prompt {
+  font-weight: 700;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+legend.tq__prompt {
+  margin-bottom: 10px;
+}
+
+.tq__pair {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.tq__arrow {
+  color: var(--ink-faint);
+}
+
+.tq__options {
+  display: grid;
+  gap: 6px;
+}
+
+.tq__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-m);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.tq__option:hover {
+  border-color: var(--line-strong);
+}
+
+.tq__option:has(input:checked) {
+  border-color: var(--ink);
+  background: var(--paper-sunk);
+}
+
+.tq__option input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--ink);
+}
+
+.paper__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1.5px solid var(--line-strong);
+}
+
+/* Auswertung im Rotstift-Stil */
+.grade {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.grade__mark {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  padding-top: 28px;
+  min-width: 128px;
+  height: 104px;
+  padding-inline: 18px;
+  border: 3px solid var(--wrong);
+  border-radius: 50% 46% 52% 48% / 55% 50% 50% 45%;
+  color: var(--wrong);
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: rotate(-4deg);
+  white-space: nowrap;
+}
+
+.grade__mark span {
+  font-size: 1.5rem;
+}
+
+.grade__pct {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.grade__verdict {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.grade__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tr {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.tr__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.tr.is-ok .tr__icon {
+  color: var(--correct);
+}
+
+.tr.is-bad .tr__icon {
+  color: var(--wrong);
+}
+
+.tr__body {
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+  min-width: 0;
+}
+
+.tr__prompt {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.tr__given {
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.tr__given s {
+  text-decoration-color: var(--wrong);
+  text-decoration-thickness: 2px;
+}
+
+/* Lehrer-Korrektur in roter Handschrift */
+.tr__fix {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--wrong);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.tr.is-ok .tr__fix {
+  color: var(--correct);
+}
+
+.tr__hint {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}

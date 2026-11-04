@@ -1,0 +1,208 @@
+.kasten {
+  --pile-h: 150px;
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 14px;
+  align-items: end;
+  width: 100%;
+  container-type: inline-size;
+}
+
+.kasten__legend {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.kasten__legend i {
+  width: 18px;
+  height: 5px;
+  border: 1px solid var(--marker-strong);
+  border-radius: 1.5px;
+  background: var(--marker);
+}
+
+/* schmal: nur die Zahl im gelben Etikett */
+@container (max-width: 520px) {
+  .kasten__duelabel {
+    display: none;
+  }
+}
+
+.kasten--compact {
+  --pile-h: 104px;
+}
+
+.kasten__stack,
+.kasten__box {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kasten__slots {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+/* Innenwand des Kastens */
+.kasten__slots::before {
+  content: '';
+  position: absolute;
+  inset: 48% 0 0;
+  border-radius: 10px 10px 0 0;
+  background: color-mix(in srgb, var(--box) 8%, transparent);
+}
+
+.kasten__col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: var(--pile-h);
+  padding-bottom: 5px;
+}
+
+/* Trennkarten zwischen den Fächern */
+.kasten__slots .kasten__col + .kasten__col::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  bottom: 0;
+  width: 2px;
+  height: 58%;
+  border-radius: 2px 2px 0 0;
+  background: color-mix(in srgb, var(--box) 35%, transparent);
+}
+
+.kasten__count {
+  position: relative;
+  margin-bottom: 6px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.kasten__col.is-empty .kasten__count {
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.kasten__due {
+  display: block;
+  margin: 2px auto 0;
+  width: fit-content;
+  padding: 0 0.4em;
+  border-radius: 4px;
+  background: var(--marker);
+  color: var(--marker-ink);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.kasten__pile {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+}
+
+.kasten__pile i {
+  display: block;
+  width: 74%;
+  max-width: 66px;
+  height: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 1.5px;
+  background: var(--paper);
+  transition: background-color 0.3s;
+}
+
+.kasten__pile i.is-due {
+  border-color: var(--marker-strong);
+  background: var(--marker);
+}
+
+.kasten__stack .kasten__pile i {
+  width: 54px;
+  transform: translateX(var(--shift, 0)) rotate(var(--tilt, 0));
+}
+
+.kasten__base {
+  display: grid;
+  place-items: center;
+  height: 34px;
+  border-radius: 4px 4px 10px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.kasten__front {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: var(--box);
+  color: var(--box-ink);
+}
+
+.kasten__front span + span {
+  border-left: 1px solid color-mix(in srgb, var(--box-ink) 18%, transparent);
+}
+
+.kasten__front span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.kasten__base--stack {
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 8px;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+}
+
+.kasten__labels {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 6px;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.kasten__hint {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .kasten {
+    --pile-h: 128px;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .kasten__stack .kasten__pile i {
+    width: 44px;
+  }
+
+  .kasten__labels,
+  .kasten__hint {
+    font-size: 0.6875rem;
+  }
+}
