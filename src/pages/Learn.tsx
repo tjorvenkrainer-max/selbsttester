@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Check, SlidersHorizontal, X } from 'lucide-react';
+import { Check, Lightbulb, SlidersHorizontal, X } from 'lucide-react';
 import { getData, recordProgress, updateSettings, useData } from '../lib/store';
 import {
   answerCurrent,
@@ -14,6 +14,7 @@ import {
   type McQuestion,
   type Question,
   type WrittenQuestion,
+  hintFor,
 } from '../lib/learn';
 import { checkAnswer, type Verdict } from '../lib/answer';
 import { boxStats, hardCardIds } from '../lib/srs';
@@ -95,11 +96,11 @@ function LearnSession({
   const stats = sessionStats(state);
 
   const commit = useCallback(
-    (ok: boolean) => {
+    (ok: boolean, assisted = false) => {
       const q = state.question;
       if (!q || committed.current === q) return; // jede Frage nur einmal werten
       committed.current = q;
-      const out = answerCurrent(state, ok, getData().progress[q.itemId], ctx, Date.now());
+      const out = answerCurrent(state, ok, getData().progress[q.itemId], ctx, Date.now(), assisted);
       recordProgress(out.cardId, out.progress);
       setState(out.state);
     },
@@ -286,15 +287,28 @@ function McView({ q, tag, langs, onAnswer }: { q: McQuestion; tag?: string; lang
 }
 
 // ---------- Schreiben ----------
-function WrittenView({ q, tag, langs, onAnswer }: { q: WrittenQuestion; tag?: string; langs: Langs; onAnswer: (ok: boolean) => void }) {
+function WrittenView({
+  q,
+  tag,
+  langs,
+  onAnswer,
+}: {
+  q: WrittenQuestion;
+  tag?: string;
+  langs: Langs;
+  onAnswer: (ok: boolean, assisted?: boolean) => void;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState('');
   const [verdict, setVerdict] = useState<Verdict | null>(null);
   const [skipped, setSkipped] = useState(false);
+  const [tips, setTips] = useState(0); // wie oft „Tipp“ gedrückt
   const praise = usePraise();
   const answered = verdict !== null || skipped;
   const ok = verdict?.result === 'correct';
-  const autoNext = ok && !verdict?.hint;
+  const assisted = tips > 0;
+  const hint = hintFor(q.answer, tips);
+  const autoNext = ok && !verdict?.hint && !assisted;
 
   useAutoAdvance(autoNext, 1100, () => onAnswer(true));
 
@@ -312,7 +326,7 @@ function WrittenView({ q, tag, langs, onAnswer }: { q: WrittenQuestion; tag?: st
         className="write"
         onSubmit={(e) => {
           e.preventDefault();
-          if (answered) onAnswer(ok);
+          if (answered) onAnswer(ok, ok && assisted);
           else if (!value.trim()) skip(); // Enter ohne Eingabe = weiß ich nicht
           else {
             const v = checkAnswer(value, q.answer);
@@ -339,7 +353,7 @@ function WrittenView({ q, tag, langs, onAnswer }: { q: WrittenQuestion; tag?: st
             autoCapitalize="off"
             spellCheck={false}
             enterKeyHint={answered ? 'next' : 'done'}
-            placeholder="Antwort – oder leer lassen und Enter"
+            placeholder="Deine Antwort"
           />
           {!answered && (
             <button type="submit" className="btn btn--ink">
@@ -350,21 +364,43 @@ function WrittenView({ q, tag, langs, onAnswer }: { q: WrittenQuestion; tag?: st
 
         <AccentBar chars={accentsFor(langs.answer)} inputRef={inputRef} value={value} onChange={setValue} disabled={answered} />
 
+        {assisted && !answered && (
+          <p className="write__tip" aria-live="polite">
+            <Lightbulb aria-hidden="true" /> Tipp: <strong>{hint.text}</strong>
+          </p>
+        )}
+
         <div className="feedback-slot" aria-live="polite">
           {!answered && (
-            <button type="button" className="linkbtn" onClick={skip}>
-              Weiß ich nicht
-            </button>
+            <div className="write__links">
+              <button type="button" className="linkbtn" onClick={skip}>
+                Weiß ich nicht
+              </button>
+              {hint.max > 0 && (
+                <button
+                  type="button"
+                  className="linkbtn"
+                  disabled={tips >= hint.max}
+                  onClick={() => {
+                    setTips((t) => t + 1);
+                    inputRef.current?.focus();
+                  }}
+                >
+                  {tips === 0 ? 'Tipp' : tips >= hint.max ? 'Mehr Tipps gibt’s nicht' : 'Noch ein Tipp'}
+                </button>
+              )}
+            </div>
           )}
           {answered && ok && (
             <div className="feedback feedback--ok">
               <div className="feedback__text">
                 <strong>
-                  <Check aria-hidden="true" /> {praise}
+                  <Check aria-hidden="true" /> {assisted ? 'Richtig – mit Tipp' : praise}
                 </strong>
+                {assisted && <span>Zählt halb: Die Karte kommt in der nächsten Runde nochmal.</span>}
                 {verdict?.hint && <span>{verdict.hint}</span>}
               </div>
-              <button type="submit" className="btn btn--sm feedback__next" autoFocus={!!verdict?.hint}>
+              <button type="submit" className="btn btn--sm feedback__next" autoFocus={!!verdict?.hint || assisted}>
                 Weiter
               </button>
             </div>
@@ -389,7 +425,7 @@ function WrittenView({ q, tag, langs, onAnswer }: { q: WrittenQuestion; tag?: st
                     className="btn btn--sm"
                     onClick={() => {
                       playCorrect();
-                      onAnswer(true);
+                      onAnswer(true, assisted);
                     }}
                   >
                     Ich hatte recht
@@ -495,10 +531,12 @@ function RoundSummary({ state, ctx, onNext }: { state: LearnState; ctx: LearnCon
           const card = ctx.cards.get(r.id)?.card;
           const item = state.items.find((i) => i.id === r.id);
           if (!card || !item) return null;
-          const label = !item.needs.length ? 'sitzt' : item.needs.length < item.steps ? 'Auswahl geschafft' : 'kommt wieder';
+          const label = r.assisted ? 'mit Tipp – kommt wieder' : !item.needs.length ? 'sitzt' : item.needs.length < item.steps ? 'Auswahl geschafft' : 'kommt wieder';
           return (
-            <li key={r.id} className={r.ok ? 'is-ok' : 'is-bad'}>
-              <span className="summary__icon">{r.ok ? <Check aria-label="richtig" /> : <X aria-label="falsch" />}</span>
+            <li key={r.id} className={r.assisted ? 'is-tip' : r.ok ? 'is-ok' : 'is-bad'}>
+              <span className="summary__icon">
+                {r.assisted ? <Lightbulb aria-label="mit Tipp" /> : r.ok ? <Check aria-label="richtig" /> : <X aria-label="falsch" />}
+              </span>
               <span className="summary__card">
                 <span className="summary__term">{card.term}</span>
                 <span className="summary__def">{card.definition}</span>

@@ -353,6 +353,41 @@
   background: var(--wrong-bg);
 }
 
+.write__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+.linkbtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  text-decoration: none;
+}
+
+.write__tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1.5px dashed var(--almost);
+  border-radius: var(--radius-m);
+  background: var(--almost-bg);
+  font-size: 1.0625rem;
+}
+
+.write__tip svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--almost);
+}
+
+.write__tip strong {
+  font-size: 1.125rem;
+  overflow-wrap: anywhere;
+}
+
 /* Selbst prüfen */
 .selfcheck__reveal {
   justify-self: start;
@@ -425,6 +460,10 @@
 
 .summary__list .is-ok .summary__icon {
   color: var(--correct);
+}
+
+.summary__list .is-tip .summary__icon {
+  color: var(--almost);
 }
 
 .summary__list .is-bad .summary__icon {

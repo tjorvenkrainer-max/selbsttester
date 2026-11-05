@@ -3,6 +3,7 @@
 import type { AnswerWith, Card, CardProgress, QuestionTypes, Side } from './types';
 import { BOX_DAYS, MAX_BOX, cardStatus, dueAfter, emptyProgress } from './srs';
 import { pickDistractors } from './distractors';
+import { synonymParts } from './answer';
 import { shuffle, type Rng } from './random';
 
 export type Stage = 'mc' | 'written';
@@ -50,6 +51,7 @@ export interface RoundResult {
   id: string;
   ok: boolean;
   stage: Stage;
+  assisted?: boolean; // mit Tipp richtig
 }
 
 export interface LearnState {
@@ -246,14 +248,16 @@ export function answerCurrent(
   prev: CardProgress | undefined,
   ctx: LearnContext,
   now: number,
+  assisted = false,
 ): AnswerOutcome {
   if (!state.question) throw new Error('Keine offene Frage');
   const before = findItem(state, state.question.itemId);
   const stage: Stage = state.question.kind;
-  const after = applyToItem(before, stage, ok, ctx.config.questionTypes);
-  const progress = nextProgress(prev, before, after, ok, now);
+  // mit Tipp richtig: kein Fehler, aber die Karte bleibt auf ihrer Stufe und kommt nochmal
+  const after = assisted ? { ...before, wrongStreak: 0 } : applyToItem(before, stage, ok, ctx.config.questionTypes);
+  const progress = assisted ? { ...(prev ?? emptyProgress()), seen: (prev?.seen ?? 0) + 1, lastSeen: now } : nextProgress(prev, before, after, ok, now);
   const items = state.items.map((i) => (i.id === after.id ? after : i));
-  const roundResults = [...state.roundResults, { id: after.id, ok, stage }];
+  const roundResults = [...state.roundResults, { id: after.id, ok: ok && !assisted, stage, assisted }];
   const pos = state.pos + 1;
   let next: LearnState = { ...state, items, roundResults, pos };
   if (pos >= state.queue.length) {
@@ -284,4 +288,16 @@ export function sessionStats(state: LearnState): SessionStats {
   }
   const total = state.items.length;
   return { total, done, half, open: total - done - half, mistakes };
+}
+
+/** Tipp Stufe für Stufe: bei Sätzen Wort für Wort, bei einzelnen Wörtern Buchstabe für Buchstabe (nie alles) */
+export function hintFor(answer: string, level: number): { text: string; max: number } {
+  const base = (synonymParts(answer)[0] ?? answer).trim();
+  const words = base.split(/\s+/);
+  if (words.length > 1) {
+    const max = words.length - 1;
+    return { text: `${words.slice(0, Math.min(level, max)).join(' ')} …`, max };
+  }
+  const max = Math.max(base.length - 1, 0);
+  return { text: `${base.slice(0, Math.min(level, max))}…`, max };
 }

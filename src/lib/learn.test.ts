@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   answerCurrent,
   buildItems,
+  hintFor,
   nextRound,
   sessionStats,
   startSession,
@@ -159,5 +160,23 @@ describe('Wiederholung nach Fächern', () => {
     for (let i = 0; i < 4; i++) answer(env, true);
     expect(env.state.phase).toBe('done');
     expect(Object.values(env.progress).every((p) => p.level === 2 && p.box === 1)).toBe(true);
+  });
+});
+
+describe('Tipp', () => {
+  it('verrät Wort für Wort bzw. Buchstabe für Buchstabe, nie alles', () => {
+    expect(hintFor('Je suis d’accord avec toi.', 2)).toEqual({ text: 'Je suis …', max: 4 });
+    expect(hintFor('Je suis d’accord avec toi.', 9).text).toBe('Je suis d’accord avec …');
+    expect(hintFor('certainement', 2)).toEqual({ text: 'ce…', max: 11 });
+    expect(hintFor('actuellement/de nos jours/à présent', 1).text).toBe('a…'); // erste Variante
+  });
+
+  it('mit Tipp richtig: kein Fehler, Karte rückt nicht auf, kommt wieder', () => {
+    const env = setup(makeCards(3), {}, 'set', { questionTypes: 'written' });
+    const id = env.state.question!.itemId;
+    const out = answerCurrent(env.state, true, undefined, env.ctx, NOW, true);
+    expect(out.progress).toMatchObject({ seen: 1, correct: 0, wrong: 0, level: 0, box: 0 });
+    expect(out.state.items.find((i) => i.id === id)?.needs).toEqual(['written']);
+    expect(out.state.roundResults[0]).toMatchObject({ ok: false, assisted: true });
   });
 });
